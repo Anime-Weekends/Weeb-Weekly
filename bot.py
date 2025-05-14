@@ -119,6 +119,21 @@ async def broadcast(client, message):
 
     await message.reply(f"Broadcast complete.\nSuccess: {success}\nFailed: {fail}")
 
+@app.on_message(filters.command("status") & filters.user(ADMINS))
+async def status(client, message):
+    total_users = user_settings_collection.count_documents({})
+    config = global_settings_collection.find_one({"_id": "config"})
+    news_channel = config.get("news_channel") if config else "Not Set"
+
+    status_message = (
+        f"**Bot Status:**\n"
+        f"- Total Users: `{total_users}`\n"
+        f"- News Channel: `{news_channel}`\n"
+        f"- Status: `Running`"
+    )
+
+    await message.reply(status_message)
+
     
 async def main():
     await app.start()
