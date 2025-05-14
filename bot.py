@@ -44,17 +44,21 @@ async def send_message_to_user(chat_id: int, message: str, image_url: str = None
 
 @app.on_message(filters.command("start"))
 async def start(client, message):
+    user = message.from_user
     chat_id = message.chat.id
-    user_id = message.from_user.id
-    username = message.from_user.username or "NoUsername"
 
-    # Save or update user info in the database
+    # Save user data to database
     user_settings_collection.update_one(
-        {"_id": user_id},
-        {"$set": {
-            "username": username,
-            "chat_id": chat_id
-        }},
+        {"_id": user.id},
+        {
+            "$set": {
+                "chat_id": chat_id,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "is_bot": user.is_bot,
+            }
+        },
         upsert=True
     )
 
@@ -68,13 +72,11 @@ async def start(client, message):
         ],
     ])
 
-    photo_url = START_PIC
-
     await app.send_photo(
         chat_id, 
-        photo_url,
+        START_PIC,
         caption=(
-            f"**ʙᴀᴋᴋᴀᴀᴀ {username}!!!**\n"
+            f"**ʙᴀᴋᴋᴀᴀᴀ {user.username or user.first_name}!!!**\n"
             f"**ɪ ᴀᴍ ᴀɴ ᴀɴɪᴍᴇ ɴᴇᴡs ʙᴏᴛ.**\n"
             f"**ɪ ᴛᴀᴋᴇ ᴀɴɪᴍᴇ ɴᴇᴡs ᴄᴏᴍɪɴɢ ғʀᴏᴍ ʀss ꜰᴇᴇᴅs ᴀɴᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴜᴘʟᴏᴀᴅ ɪᴛ ᴛᴏ ᴍʏ ᴍᴀsᴛᴇʀ's ᴀɴɪᴍᴇ ɴᴇᴡs ᴄʜᴀɴɴᴇʟ.**"
         ),
